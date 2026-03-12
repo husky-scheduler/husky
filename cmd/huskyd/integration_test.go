@@ -3,10 +3,12 @@ package daemoncmd
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -21,6 +23,8 @@ import (
 	"github.com/husky-scheduler/husky/internal/scheduler"
 	"github.com/husky-scheduler/husky/internal/store"
 )
+
+const integrationTestTimeout = 5 * time.Second
 
 func writeDaemonTestConfig(t *testing.T, body string) string {
 	t.Helper()
@@ -54,6 +58,11 @@ func newTestDaemonFromPath(t *testing.T, cfgPath string) *daemon {
 	d.sched = scheduler.New(cfg, testLogger(), func(ctx context.Context, jobName string, _ time.Time) {
 		d.dispatch(ctx, jobName, store.TriggerSchedule, "", newCycleID(), 1)
 	})
+	t.Cleanup(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), integrationTestTimeout)
+		defer cancel()
+		d.exec.Drain(ctx)
+	})
 	return d
 }
 
@@ -79,6 +88,40 @@ func waitForLastRunStatus(t *testing.T, st *store.Store, jobName string, want st
 		return run != nil && run.Status == want
 	}, timeout, 20*time.Millisecond)
 	return run
+}
+
+func blockingCommand(startedPath string, releasePath string) string {
+	return fmt.Sprintf(
+		"printf started > %s; while [ ! -f %s ]; do sleep 0.01; done; echo done",
+		strconv.Quote(startedPath),
+		strconv.Quote(releasePath),
+	)
+}
+
+func waitForFile(t *testing.T, path string, timeout time.Duration) {
+	t.Helper()
+	require.Eventually(t, func() bool {
+		_, err := os.Stat(path)
+		return err == nil
+	}, timeout, 20*time.Millisecond)
+}
+
+func releaseBlockingCommand(t *testing.T, releasePath string) {
+	t.Helper()
+	require.NoError(t, os.WriteFile(releasePath, []byte("release"), 0o644))
+}
+
+func assertNoRunAppears(t *testing.T, st *store.Store, jobName string, duration time.Duration) {
+	t.Helper()
+	deadline := time.Now().Add(duration)
+	for time.Now().Before(deadline) {
+		run, err := st.GetLastRunForJob(context.Background(), jobName)
+		require.NoError(t, err)
+		if run != nil {
+			t.Fatalf("expected no run for %q, but found run %d with status %s", jobName, run.ID, run.Status)
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
 }
 
 func TestIntegration_FullPipeline_ExecutesEndToEnd(t *testing.T) {
@@ -140,6 +183,11 @@ jobs:
 }
 
 func TestIntegration_ConcurrencyForbid_SkipsOverlappingRun(t *testing.T) {
+	startedPath := filepath.Join(t.TempDir(), "sleeper.started")
+	releasePath := filepath.Join(t.TempDir(), "sleeper.release")
+	t.Cleanup(func() {
+		_ = os.WriteFile(releasePath, []byte("release"), 0o644)
+	})
 	cfgPath := writeDaemonTestConfig(t, `
 version: "1"
 jobs:
@@ -147,17 +195,18 @@ jobs:
     description: "slow"
     frequency: manual
     concurrency: forbid
-    timeout: "2s"
-    command: "sleep 0.2 && echo done"
+    timeout: "5s"
+    command: `+strconv.Quote(blockingCommand(startedPath, releasePath))+`
 `)
 	d := newTestDaemonFromPath(t, cfgPath)
 	ctx := context.Background()
 
 	d.dispatch(ctx, "sleeper", store.TriggerManual, "first", "cycle-a", 1)
-	require.Eventually(t, func() bool { return d.exec.IsRunning("sleeper") }, time.Second, 10*time.Millisecond)
+	waitForFile(t, startedPath, integrationTestTimeout)
 	d.dispatch(ctx, "sleeper", store.TriggerManual, "second", "cycle-b", 1)
+	releaseBlockingCommand(t, releasePath)
 
-	waitForLastRunStatus(t, d.st, "sleeper", store.StatusSuccess, 2*time.Second)
+	waitForLastRunStatus(t, d.st, "sleeper", store.StatusSuccess, integrationTestTimeout)
 	runs, err := d.st.GetRunsForJob(context.Background(), "sleeper", 10)
 	require.NoError(t, err)
 	assert.Len(t, runs, 1, "overlapping run must be skipped when concurrency=forbid")
@@ -182,22 +231,27 @@ jobs:
 }
 
 func TestIntegration_Cancel_MarksRunCancelled(t *testing.T) {
+	startedPath := filepath.Join(t.TempDir(), "cancel.started")
+	releasePath := filepath.Join(t.TempDir(), "cancel.release")
+	t.Cleanup(func() {
+		_ = os.WriteFile(releasePath, []byte("release"), 0o644)
+	})
 	cfgPath := writeDaemonTestConfig(t, `
 version: "1"
 jobs:
   sleeper:
     description: "cancel me"
     frequency: manual
-    timeout: "2s"
-    command: "sleep 1"
+    timeout: "5s"
+    command: `+strconv.Quote(blockingCommand(startedPath, releasePath))+`
 `)
 	d := newTestDaemonFromPath(t, cfgPath)
 
 	d.dispatch(context.Background(), "sleeper", store.TriggerManual, "cancel-test", "cycle-cancel", 1)
-	require.Eventually(t, func() bool { return d.exec.IsRunning("sleeper") }, time.Second, 10*time.Millisecond)
+	waitForFile(t, startedPath, integrationTestTimeout)
 	require.NoError(t, d.cancelFunc("sleeper"))
 
-	run := waitForLastRunStatus(t, d.st, "sleeper", store.StatusCancelled, 2*time.Second)
+	run := waitForLastRunStatus(t, d.st, "sleeper", store.StatusCancelled, integrationTestTimeout)
 	assert.Equal(t, store.StatusCancelled, run.Status)
 	assert.Equal(t, "cancelled", run.StatusReason)
 	assert.NotNil(t, run.ExitCode)
@@ -223,7 +277,7 @@ jobs:
 	}))
 
 	d.reconcileCatchup(context.Background())
-	run := waitForLastRunStatus(t, d.st, "daily_job", store.StatusSuccess, 2*time.Second)
+	run := waitForLastRunStatus(t, d.st, "daily_job", store.StatusSuccess, integrationTestTimeout)
 	assert.Equal(t, store.TriggerSchedule, run.Trigger)
 	assert.Equal(t, "catchup", run.Reason)
 }
@@ -247,10 +301,7 @@ jobs:
 	}))
 
 	d.reconcileCatchup(context.Background())
-	time.Sleep(200 * time.Millisecond)
-	run, err := d.st.GetLastRunForJob(context.Background(), "daily_job")
-	require.NoError(t, err)
-	assert.Nil(t, run, "catchup=false must skip missed runs")
+	assertNoRunAppears(t, d.st, "daily_job", 500*time.Millisecond)
 }
 
 func TestIntegration_Reload_RejectsCycleAndKeepsOldConfig(t *testing.T) {
@@ -291,19 +342,24 @@ jobs:
 }
 
 func TestIntegration_Reload_DoesNotInterruptRunningJob(t *testing.T) {
+	startedPath := filepath.Join(t.TempDir(), "reload.started")
+	releasePath := filepath.Join(t.TempDir(), "reload.release")
+	t.Cleanup(func() {
+		_ = os.WriteFile(releasePath, []byte("release"), 0o644)
+	})
 	cfgPath := writeDaemonTestConfig(t, `
 version: "1"
 jobs:
   sleeper:
     description: "sleeper"
     frequency: manual
-    timeout: "2s"
-    command: "sleep 0.25 && echo done"
+    timeout: "5s"
+    command: `+strconv.Quote(blockingCommand(startedPath, releasePath))+`
 `)
 	d := newTestDaemonFromPath(t, cfgPath)
 
 	d.dispatch(context.Background(), "sleeper", store.TriggerManual, "before-reload", "cycle-run", 1)
-	require.Eventually(t, func() bool { return d.exec.IsRunning("sleeper") }, time.Second, 10*time.Millisecond)
+	waitForFile(t, startedPath, integrationTestTimeout)
 
 	require.NoError(t, os.WriteFile(cfgPath, []byte(`
 version: "1"
@@ -311,8 +367,8 @@ jobs:
   sleeper:
     description: "sleeper"
     frequency: manual
-    timeout: "2s"
-    command: "sleep 0.25 && echo done"
+    timeout: "5s"
+    command: `+strconv.Quote(blockingCommand(startedPath, releasePath))+`
   extra:
     description: "extra"
     frequency: manual
@@ -320,8 +376,9 @@ jobs:
 `), 0o644))
 
 	require.NoError(t, d.reload())
-	assert.True(t, d.exec.IsRunning("sleeper"), "hot-reload must not interrupt an in-flight job")
-	waitForLastRunStatus(t, d.st, "sleeper", store.StatusSuccess, 2*time.Second)
+	require.Eventually(t, func() bool { return d.exec.IsRunning("sleeper") }, integrationTestTimeout, 20*time.Millisecond)
+	releaseBlockingCommand(t, releasePath)
+	waitForLastRunStatus(t, d.st, "sleeper", store.StatusSuccess, integrationTestTimeout)
 	_, ok := d.cfg.Jobs["extra"]
 	assert.True(t, ok, "new config should be active after reload")
 }
@@ -340,7 +397,7 @@ jobs:
 	d := newTestDaemonFromPath(t, cfgPath)
 
 	d.dispatch(context.Background(), "slow_job", store.TriggerManual, "sla-check", "cycle-sla", 1)
-	run := waitForLastRunStatus(t, d.st, "slow_job", store.StatusSuccess, 2*time.Second)
+	run := waitForLastRunStatus(t, d.st, "slow_job", store.StatusSuccess, integrationTestTimeout)
 	assert.True(t, run.SLABreached, "completed run should retain sla_breached flag")
 }
 
@@ -361,8 +418,8 @@ jobs:
 	d := newTestDaemonFromPath(t, cfgPath)
 
 	d.dispatch(context.Background(), "checked_job", store.TriggerManual, "hc-fail", "cycle-hc-fail", 1)
-	waitForLastRunStatus(t, d.st, "checked_job", store.StatusFailed, 2*time.Second)
-	runs := waitForRuns(t, d.st, "checked_job", 2, 2*time.Second)
+	waitForLastRunStatus(t, d.st, "checked_job", store.StatusFailed, integrationTestTimeout)
+	runs := waitForRuns(t, d.st, "checked_job", 2, integrationTestTimeout)
 	assert.Equal(t, 2, len(runs), "healthcheck failure should trigger a retry attempt")
 	assert.Equal(t, 2, runs[0].Attempt)
 	assert.Equal(t, store.StatusFailed, runs[0].Status)
@@ -386,7 +443,7 @@ jobs:
 	d := newTestDaemonFromPath(t, cfgPath)
 
 	d.dispatch(context.Background(), "checked_job", store.TriggerManual, "hc-warn", "cycle-hc-warn", 1)
-	run := waitForLastRunStatus(t, d.st, "checked_job", store.StatusSuccess, 2*time.Second)
+	run := waitForLastRunStatus(t, d.st, "checked_job", store.StatusSuccess, integrationTestTimeout)
 	require.NotNil(t, run.HCStatus)
 	assert.Equal(t, store.HCWarn, *run.HCStatus)
 }
@@ -419,14 +476,18 @@ jobs:
 	d := newTestDaemonFromPath(t, cfgPath)
 
 	d.dispatch(context.Background(), "flaky", store.TriggerManual, "retry-notify", "cycle-retry", 1)
-	waitForRuns(t, d.st, "flaky", 2, 2*time.Second)
+	waitForRuns(t, d.st, "flaky", 2, integrationTestTimeout)
 
-	select {
-	case payload := <-requests:
-		assert.Equal(t, "attempt=2 retries=1 status=RETRYING", payload["message"])
-	case <-time.After(2 * time.Second):
-		t.Fatal("timed out waiting for retry notification")
-	}
+	var payload map[string]any
+	require.Eventually(t, func() bool {
+		select {
+		case payload = <-requests:
+			return true
+		default:
+			return false
+		}
+	}, integrationTestTimeout, 20*time.Millisecond, "timed out waiting for retry notification")
+	assert.Equal(t, "attempt=2 retries=1 status=RETRYING", payload["message"])
 }
 
 func TestIntegration_PauseResumeByTag(t *testing.T) {

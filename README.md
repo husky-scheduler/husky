@@ -98,12 +98,27 @@ husky version
 
 ### From a release archive
 
-Use the platform archive from GitHub Releases, extract it, and place `husky` on your `PATH`.
+Use the platform archive from GitHub Releases, extract it, and place the binary on your `PATH`.
+
+- macOS/Linux: `husky`
+- Windows: `husky.exe`
 
 ### Via install script
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/husky-scheduler/husky/main/install.sh | sh
+```
+
+### Via PowerShell on Windows
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((Invoke-RestMethod 'https://raw.githubusercontent.com/husky-scheduler/husky/main/install.ps1')))"
+```
+
+To install a specific version instead of the latest published release:
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((Invoke-RestMethod 'https://raw.githubusercontent.com/husky-scheduler/husky/main/install.ps1'))) -Version 0.1.0-alpha.3"
 ```
 
 ### Via Homebrew
@@ -123,6 +138,13 @@ Packaging assets live under `packaging/` and include:
 - nfpm hooks for package builds
 
 See [docs/operations.md](docs/operations.md) for service-manager guidance.
+
+### Windows notes
+
+- the PowerShell installer downloads the Windows release archive, verifies `checksums.txt`, and installs `husky.exe`
+- by default it installs to `%LOCALAPPDATA%\Programs\Husky`
+- by default it also adds that directory to the user `PATH`
+- if you prefer manual install, download `husky_windows_amd64.tar.gz`, extract it, and place `husky.exe` on your `PATH`
 
 ## Quick start
 

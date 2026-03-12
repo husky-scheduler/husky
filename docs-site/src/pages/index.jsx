@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
@@ -24,13 +24,34 @@ const pillars = [
   },
 ];
 
-const steps = [
+const installCommands = {
+  linux: {
+    label: 'Linux',
+    description: 'A single curl command. No package manager required.',
+    lang: 'bash',
+    prompt: '$',
+    code: `curl -fsSL https://raw.githubusercontent.com/husky-scheduler/husky/main/install.sh | sh`,
+  },
+  macos: {
+    label: 'macOS',
+    description: 'Install with Homebrew.',
+    lang: 'bash',
+    prompt: '$',
+    code: `brew tap husky-scheduler/husky && brew install husky`,
+  },
+  windows: {
+    label: 'Windows',
+    description: 'Install with PowerShell.',
+    lang: 'powershell',
+    prompt: 'PS>',
+    code: `powershell -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((Invoke-RestMethod 'https://raw.githubusercontent.com/husky-scheduler/husky/main/install.ps1')))"`,
+  },
+};
+
+const baseSteps = [
   {
     num: '1',
     title: 'Install the binary',
-    description: 'A single curl command. No package manager required.',
-    lang: 'bash',
-    code: `curl -sSL https://raw.githubusercontent.com/husky-scheduler/husky/main/install.sh | sh`,
   },
   {
     num: '2',
@@ -47,6 +68,24 @@ const steps = [
     code: `husky start`,
   },
 ];
+
+function detectInstallPlatform() {
+  if (typeof navigator === 'undefined') {
+    return 'linux';
+  }
+
+  const platform = `${navigator.userAgentData?.platform || ''} ${navigator.platform || ''} ${navigator.userAgent || ''}`.toLowerCase();
+
+  if (platform.includes('win')) {
+    return 'windows';
+  }
+
+  if (platform.includes('mac') || platform.includes('darwin')) {
+    return 'macos';
+  }
+
+  return 'linux';
+}
 
 const features = [
   {
@@ -113,6 +152,25 @@ function HomeContent() {
   const darkLogoUrl = useBaseUrl('img/husky_logo_dark.png');
   const logoUrl = colorMode === 'dark' ? darkLogoUrl : lightLogoUrl;
   const [activeStep, setActiveStep] = useState(0);
+  const [installPlatform, setInstallPlatform] = useState('linux');
+  const installCommand = installCommands[installPlatform];
+  const steps = useMemo(
+    () => [
+      {
+        ...baseSteps[0],
+        description: `${installCommand.description} Detected: ${installCommand.label}.`,
+        lang: installCommand.lang,
+        code: installCommand.code,
+      },
+      ...baseSteps.slice(1),
+    ],
+    [installCommand],
+  );
+
+  useEffect(() => {
+    setInstallPlatform(detectInstallPlatform());
+  }, []);
+
   return (
     <>
       {/* ─── Hero ──────────────────────────────────────────────────────── */}
@@ -148,9 +206,9 @@ function HomeContent() {
             </a>
           </div>
           <div className={styles.heroInstall}>
-            <span className={styles.installPrompt}>$</span>
+            <span className={styles.installPrompt}>{installCommand.prompt}</span>
             <code className={styles.installCode}>
-              curl -sSL https://raw.githubusercontent.com/husky-scheduler/husky/main/install.sh | sh
+              {installCommand.code}
             </code>
           </div>
         </div>

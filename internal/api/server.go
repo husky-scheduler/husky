@@ -814,6 +814,8 @@ func parseIntDefault(raw string, fallback int) int {
 
 func isTerminal(status store.RunStatus) bool {
 	switch status {
+	case store.StatusPending, store.StatusRunning:
+		return false
 	case store.StatusSuccess, store.StatusFailed, store.StatusCancelled, store.StatusRetrying, store.StatusSkipped:
 		return true
 	default:

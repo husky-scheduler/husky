@@ -125,8 +125,8 @@ var outputCaptureModes = map[string]bool{
 	"exit_code":  true,
 }
 
-// validateOutputCaptureMode returns an error message if mode is not a
-// recognised output capture mode, or "" if valid.
+// validateOutputCaptureMode returns an error message if mode is not a recognised
+// output capture mode, or "" if valid.
 // Valid forms: last_line | first_line | exit_code | json_field:<key> | regex:<pattern>
 func validateOutputCaptureMode(mode string) string {
 	if outputCaptureModes[mode] {
@@ -191,11 +191,11 @@ func validateConfig(cfg *Config, errs *ParseError) {
 // knownProviders lists the provider names that are inferred from the map key
 // when no explicit "provider" field is set.
 var knownProviders = map[string]bool{
-	"slack":      true,
-	"pagerduty":  true,
-	"discord":    true,
-	"smtp":       true,
-	"webhook":    true,
+	"slack":     true,
+	"pagerduty": true,
+	"discord":   true,
+	"smtp":      true,
+	"webhook":   true,
 }
 
 // validateIntegration validates a single integration entry.
@@ -279,14 +279,15 @@ func validateJob(name string, job *Job, defaults Defaults, errs *ParseError) {
 			effectiveTime := EffectiveJobTime(job, defaults)
 			requiresExplicitTime := !FrequencyAllowsDefaultRunTime(job.Frequency)
 
-			if effectiveTime == "" && requiresExplicitTime {
+			switch {
+			case effectiveTime == "" && requiresExplicitTime:
 				add("time", fmt.Sprintf(
 					"field is required when frequency is %q", job.Frequency))
-			} else if job.Time != "" {
+			case job.Time != "":
 				if msg := validateTime(job.Time); msg != "" {
 					add("time", msg)
 				}
-			} else if effectiveTime != "" {
+			case effectiveTime != "":
 				if msg := validateTime(effectiveTime); msg != "" {
 					add("time", msg)
 				}

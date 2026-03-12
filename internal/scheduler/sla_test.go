@@ -79,7 +79,7 @@ func TestStartSLATimer_TransitionToNotRunning(t *testing.T) {
 
 	timer := scheduler.StartSLATimer(
 		30*time.Millisecond,
-		func() bool { return running.Load() },
+		running.Load,
 		func() { called.Add(1) },
 	)
 	require.NotNil(t, timer)

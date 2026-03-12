@@ -434,12 +434,9 @@ func TestNextRunTime_dstGap(t *testing.T) {
 	// Schedule daily at 02:30 NY. On 2024-03-10, 02:30 NY doesn't exist.
 	// Go normalises it to 03:30 NY. We expect Kind=="gap".
 	job := makeJob("j", "daily", "0230", "America/New_York")
-	// now = 2024-03-10 01:00 NY (just before the gap)
-	now := inLoc("2024-03-10 01:00:00", ny).UTC()
-
 	// Temporarily move now to after 01:00 to ensure we hit the gap on same day.
 	// now = 2024-03-10 01:55 NY
-	now = inLoc("2024-03-10 01:55:00", ny).UTC()
+	now := inLoc("2024-03-10 01:55:00", ny).UTC()
 
 	got, anomaly := NextRunTime(job, emptyDefaults(), now)
 	if anomaly == nil {

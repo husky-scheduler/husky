@@ -314,7 +314,10 @@ func streamRunLogsWithPrefix(runID int64, includeHealthcheck bool, prefix string
 	}
 	u.RawQuery = q.Encode()
 
-	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	conn, resp, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return fmt.Errorf("connect log stream: %w", err)
 	}
@@ -416,8 +419,8 @@ func newValidateCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if _, err := dag.Build(cfg); err != nil {
-				return err
+			if _, dagErr := dag.Build(cfg); dagErr != nil {
+				return dagErr
 			}
 			if strict {
 				for name, job := range cfg.Jobs {
@@ -523,11 +526,11 @@ func newAuditCmd() *cobra.Command {
 
 			var sinceTime *time.Time
 			if strings.TrimSpace(since) != "" {
-				t, err := time.Parse(time.RFC3339, since)
-				if err != nil {
+				parsedSince, parseErr := time.Parse(time.RFC3339, since)
+				if parseErr != nil {
 					return fmt.Errorf("--since must be RFC3339")
 				}
-				sinceTime = &t
+				sinceTime = &parsedSince
 			}
 			runs, err := st.SearchRuns(context.Background(), store.RunSearchParams{
 				Job: job, Trigger: store.Trigger(trigger), Status: store.RunStatus(strings.ToUpper(status)), Since: sinceTime, Reason: reason, Limit: 5000,
@@ -666,11 +669,17 @@ func newIntegrationsCmd() *cobra.Command {
 			status := "set"
 			switch provider {
 			case "slack", "discord", "webhook":
-				if strings.TrimSpace(intg.WebhookURL) == "" { status = "missing" }
+				if strings.TrimSpace(intg.WebhookURL) == "" {
+					status = "missing"
+				}
 			case "pagerduty":
-				if strings.TrimSpace(intg.RoutingKey) == "" { status = "missing" }
+				if strings.TrimSpace(intg.RoutingKey) == "" {
+					status = "missing"
+				}
 			case "smtp":
-				if strings.TrimSpace(intg.Host) == "" || strings.TrimSpace(intg.From) == "" { status = "missing" }
+				if strings.TrimSpace(intg.Host) == "" || strings.TrimSpace(intg.From) == "" {
+					status = "missing"
+				}
 			}
 			fmt.Fprintf(w, "%s\t%s\t%s\n", name, provider, status)
 		}
@@ -1002,13 +1011,6 @@ func printStatusTable(statuses []ipc.JobStatus) {
 	_ = w.Flush()
 }
 
-func orDash(s *string) string {
-	if s == nil || *s == "" {
-		return "-"
-	}
-	return *s
-}
-
 // fmtTime parses an RFC3339 timestamp string and returns it in a compact,
 // human-readable form: "Jan 02 15:04 UTC".
 // Returns "-" if the pointer is nil or the string is empty/unparseable.
@@ -1134,7 +1136,7 @@ machine-readable JSON array suitable for piping to jq or other tools.`,
 			if asJSON {
 				// Pretty-print the JSON.
 				var v interface{}
-				if err := json.Unmarshal(resp.Data, &v); err != nil {
+				if unmarshalErr := json.Unmarshal(resp.Data, &v); unmarshalErr != nil {
 					fmt.Printf("%s\n", resp.Data)
 					return nil
 				}
@@ -1143,7 +1145,7 @@ machine-readable JSON array suitable for piping to jq or other tools.`,
 			} else {
 				// Data is a JSON-encoded string; decode it back to plain text.
 				var text string
-				if err := json.Unmarshal(resp.Data, &text); err != nil {
+				if unmarshalErr := json.Unmarshal(resp.Data, &text); unmarshalErr != nil {
 					fmt.Print(string(resp.Data))
 					return nil
 				}
@@ -1307,7 +1309,7 @@ func newReloadCmd() *cobra.Command {
 // an Authorization: Bearer header so the request is accepted by a huskyd
 // instance running with auth enabled.
 func authPost(rawURL string) (*http.Response, error) {
-	req, err := http.NewRequest(http.MethodPost, rawURL, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, rawURL, nil)
 	if err != nil {
 		return nil, err
 	}

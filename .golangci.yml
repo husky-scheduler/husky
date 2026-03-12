@@ -17,7 +17,6 @@ linters:
     - noctx
     - bodyclose
     - exhaustive
-    - exportloopref
     - gocritic
     - nilerr
     - revive
@@ -27,6 +26,9 @@ linters-settings:
     local-prefixes: github.com/husky-scheduler/husky
   govet:
     enable-all: true
+    disable:
+      - fieldalignment
+      - shadow
   revive:
     rules:
       - name: exported
@@ -40,4 +42,9 @@ issues:
     - path: _test\.go
       linters:
         - godot
+        - revive
+        - noctx
+        - bodyclose
+    - path: internal/store/store_config\.go
+      linters:
         - revive

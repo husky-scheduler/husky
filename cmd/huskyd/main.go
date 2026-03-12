@@ -624,7 +624,8 @@ func (d *daemon) dispatch(
 		runRow.Status = status
 		runRow.StatusReason = statusReason
 
-		if !failed {
+		switch {
+		case !failed:
 			_ = d.st.UpdateJobState(bgCtx, store.JobState{
 				JobName:     jobName,
 				LastSuccess: &finished,
@@ -637,11 +638,11 @@ func (d *daemon) dispatch(
 			}
 			// Trigger any after:<jobName> dependents.
 			d.triggerAfterSuccessors(ctx, jobName, cycleID)
-		} else if cancelled {
+		case cancelled:
 			d.logger.Info("job cancelled",
 				"job", jobName, "attempt", attempt,
 				"elapsed", res.Elapsed.Round(time.Millisecond))
-		} else {
+		default:
 			_ = d.st.UpdateJobState(bgCtx, store.JobState{
 				JobName:     jobName,
 				LastFailure: &finished,
@@ -991,6 +992,8 @@ func triggerSource(t store.Trigger, reason string) string {
 			return "cli: " + reason
 		}
 		return "cli"
+	case store.TriggerSchedule:
+		return "scheduler"
 	case store.TriggerDependency:
 		return "dependency"
 	default:

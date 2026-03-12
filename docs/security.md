@@ -145,7 +145,7 @@ If you use browser-based access outside same-origin local usage, configure CORS 
 api:
   cors:
     allowed_origins:
-      - https://husky.internal.example
+      - https://dashboard.example.com
     allow_credentials: true
 ```
 

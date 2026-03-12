@@ -24,7 +24,7 @@ PLATFORMS := \
 ## build: compile the husky binary into bin/
 build: web
 	@mkdir -p $(BIN_DIR)
-	go build $(LDFLAGS) -o $(BIN_DIR)/$(CLI)    ./cmd/husky
+	go build -trimpath $(LDFLAGS) -o $(BIN_DIR)/$(CLI)    ./cmd/husky
 	@echo "Built $(BIN_DIR)/$(CLI)"
 
 ## test: run all tests (Go + frontend)
@@ -70,7 +70,7 @@ verify-cross: web
 		$(eval DIR  := $(DIST_DIR)/verify/$(OS)_$(ARCH)) \
 		echo "Verifying modernc.org/sqlite build on $(OS)/$(ARCH)" && \
 		mkdir -p $(DIR) && \
-		CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build $(LDFLAGS) -o $(DIR)/$(CLI)$(EXT)    ./cmd/husky ; \
+		CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build -trimpath $(LDFLAGS) -o $(DIR)/$(CLI)$(EXT)    ./cmd/husky ; \
 	)
 	@echo "Verified all cross-platform builds"
 

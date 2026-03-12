@@ -55,6 +55,7 @@ signs:
     cmd: cosign
     args:
       - sign-blob
+      - --yes
       - --key=env://COSIGN_PRIVATE_KEY
       - --output-signature
       - ${signature}

@@ -1,15 +1,15 @@
 class Husky < Formula
   desc "Local-first job scheduler with dependency graphs"
   homepage "https://github.com/husky-scheduler/husky"
-  version "0.0.0-dev"
+  version "0.1.0-alpha.1"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/husky-scheduler/husky/releases/download/v#{version}/husky_darwin_arm64.tar.gz"
-      sha256 "aa1a3e554a7bcd6d0c2aa8a7a42ffc4e013cc8d0e9dc1d798a6fbbefe69ee833"
+      sha256 "f96ddee1523a49eac3421aa82eacd0ad04aa4cbef732328ded3c91692832141f"
     else
       url "https://github.com/husky-scheduler/husky/releases/download/v#{version}/husky_darwin_amd64.tar.gz"
-      sha256 "e7c8b87eef020891977e41a6ae85e421913b0eda59fb5751dd664bac8978f153"
+      sha256 "a59db9e5ae917f3ac95edeab0f5baa32f45805423ba25800c15026a23171df27"
     end
   end
 

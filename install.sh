@@ -69,14 +69,33 @@ else
   ARCHIVE="husky_darwin_amd64.tar.gz"
 fi
 
+resolve_latest_tag() {
+  latest_api="https://api.github.com/repos/$REPO/releases/latest"
+  releases_api="https://api.github.com/repos/$REPO/releases?per_page=1"
+
+  tag="$(curl -fsSL "$latest_api" 2>/dev/null | awk -F '"' '/"tag_name":/ {print $4; exit}')"
+  if [ -n "$tag" ]; then
+    printf '%s\n' "$tag"
+    return 0
+  fi
+
+  tag="$(curl -fsSL "$releases_api" | awk -F '"' '/"tag_name":/ {print $4; exit}')"
+  if [ -n "$tag" ]; then
+    printf '%s\n' "$tag"
+    return 0
+  fi
+
+  return 1
+}
+
 if [ "$VERSION" = "latest" ]; then
-  TAG="$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | awk -F '"' '/"tag_name":/ {print $4; exit}')"
+  TAG="$(resolve_latest_tag || true)"
 else
   TAG="v$VERSION"
 fi
 
 if [ -z "$TAG" ]; then
-  echo "failed to resolve release version" >&2
+  echo "failed to resolve release version; no published release tag was found" >&2
   exit 1
 fi
 

@@ -40,6 +40,8 @@ jobs:
 
       - name: Build docs site
         working-directory: docs-site
+        env:
+          DOCS_BASE_URL: /husky/
         run: npm run build
 
       - name: Configure GitHub Pages

@@ -1,11 +1,13 @@
 const {themes: prismThemes} = require('prism-react-renderer');
 
+const baseUrl = process.env.DOCS_BASE_URL || '/';
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Husky',
   tagline: 'Workflows should evolve with code and be managed like code.',
   url: 'https://husky-scheduler.github.io',
-  baseUrl: '/',
+  baseUrl,
   onBrokenLinks: 'throw',
   favicon: 'img/favicon.ico',
   organizationName: 'husky-scheduler',

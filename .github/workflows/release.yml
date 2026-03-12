@@ -101,12 +101,22 @@ jobs:
           version="${VERSION#v}"
           ./scripts/render_homebrew_formula.sh "$version" dist/checksums.txt packaging/homebrew/husky.rb packaging/homebrew/husky.rb.tmpl
 
-      - name: Checkout tap repository
-        uses: actions/checkout@v4
-        with:
-          repository: husky-scheduler/homebrew-husky
-          token: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
-          path: homebrew-husky
+      - name: Prepare tap repository
+        env:
+          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+        run: |
+          set -eu
+
+          mkdir -p homebrew-husky
+          cd homebrew-husky
+
+          git init --initial-branch=main
+          git remote add origin "https://x-access-token:${HOMEBREW_TAP_GITHUB_TOKEN}@github.com/husky-scheduler/homebrew-husky.git"
+
+          if git ls-remote --exit-code --heads origin main >/dev/null 2>&1; then
+            git fetch --depth=1 origin main
+            git reset --hard FETCH_HEAD
+          fi
 
       - name: Update tap formula
         run: |
@@ -126,4 +136,4 @@ jobs:
             exit 0
           fi
           git commit -m "husky ${VERSION}"
-          git push
+          git push -u origin main

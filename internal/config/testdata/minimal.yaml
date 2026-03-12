@@ -1,0 +1,9 @@
+# husky.yaml — minimal valid configuration (used in unit tests).
+version: "1"
+
+jobs:
+  hello:
+    description: "Print a greeting"
+    frequency: daily
+    time: "0900"
+    command: "echo hello"

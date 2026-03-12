@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/husky-scheduler/husky/schema/husky.schema.json",
+  "title": "husky.yaml",
+  "description": "Schema for the Husky job scheduler configuration file.",
+  "type": "object",
+  "required": ["version", "jobs"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Husky file format version. Semantic value check is performed after schema validation."
+    },
+    "defaults": {
+      "type": "object",
+      "description": "Default values applied to every job unless the job overrides them.",
+      "additionalProperties": false,
+      "properties": {
+        "timeout": { "type": "string" },
+        "retries": { "type": "integer", "minimum": 0 },
+        "retry_delay": { "type": "string" },
+        "notify_on_failure": { "type": "boolean" },
+        "on_failure": { "type": "string" },
+        "default_run_time": {
+          "type": "string",
+          "description": "Default HHMM time applied to weekly, weekdays, weekends, and on:[...] schedules when a job omits time."
+        },
+        "timezone": {
+          "type": "string",
+          "description": "Global IANA timezone identifier. Semantic check performed after schema validation."
+        }
+      }
+    },
+    "jobs": {
+      "type": "object",
+      "description": "Map of job name to job definition.",
+      "additionalProperties": { "$ref": "#/$defs/job" }
+    },
+    "integrations": {
+      "type": "object",
+      "description": "Provider credentials for notification dispatch. Keys are either known provider names (slack, pagerduty, discord, smtp, webhook) or arbitrary names when provider field is set explicitly.",
+      "additionalProperties": { "$ref": "#/$defs/integration" }
+    }
+  },
+  "$defs": {
+    "notifyEvent": {
+      "description": "A notification target — either a shorthand string (\"slack:#channel\") or a full object.",
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "required": ["channel"],
+          "additionalProperties": false,
+          "properties": {
+            "channel": { "type": "string" },
+            "message": { "type": "string" },
+            "attach_logs": { "type": "string" },
+            "only_after_failure": { "type": "boolean" }
+          }
+        }
+      ]
+    },
+    "job": {
+      "type": "object",
+      "required": ["description", "frequency", "command"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string" },
+        "frequency": { "type": "string" },
+        "time": { "type": "string" },
+        "command": { "type": "string" },
+        "working_dir": { "type": "string" },
+        "depends_on": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "timeout": { "type": "string" },
+        "retries": { "type": "integer", "minimum": 0 },
+        "retry_delay": { "type": "string" },
+        "concurrency": { "type": "string" },
+        "on_failure": { "type": "string" },
+        "env": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "notify": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "on_failure": { "$ref": "#/$defs/notifyEvent" },
+            "on_success": { "$ref": "#/$defs/notifyEvent" },
+            "on_sla_breach": { "$ref": "#/$defs/notifyEvent" },
+            "on_retry": { "$ref": "#/$defs/notifyEvent" }
+          }
+        },
+        "catchup": { "type": "boolean" },
+        "sla": {
+          "type": "string",
+          "description": "Expected maximum run duration. Fires on_sla_breach notify if exceeded. Semantic check (sla < timeout) performed after schema validation."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Arbitrary labels for grouping and bulk CLI operations. Semantic constraints (max 10, max 32 chars, format) are enforced after schema validation."
+        },
+        "timezone": {
+          "type": "string",
+          "description": "IANA timezone identifier for this job's time field. Semantic check performed after schema validation."
+        },
+        "healthcheck": {
+          "type": "object",
+          "required": ["command"],
+          "additionalProperties": false,
+          "properties": {
+            "command": { "type": "string" },
+            "timeout": { "type": "string" },
+            "on_fail": { "type": "string" }
+          }
+        },
+        "output": {
+          "type": "object",
+          "description": "Variables captured from stdout. Keys are variable names; values are capture mode strings.",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "integration": {
+      "type": "object",
+      "description": "Credentials for a single notification provider. Semantic validation (required fields per provider) is enforced after schema validation.",
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "type": "string",
+          "description": "Explicit provider name. Required when the map key is not itself a known provider name."
+        },
+        "webhook_url": {
+          "type": "string",
+          "description": "Incoming webhook URL. Required for slack, discord, and webhook providers."
+        },
+        "routing_key": {
+          "type": "string",
+          "description": "PagerDuty Events API v2 routing key. Required for pagerduty provider."
+        },
+        "host": {
+          "type": "string",
+          "description": "SMTP server hostname. Required for smtp provider."
+        },
+        "port": {
+          "type": "integer",
+          "description": "SMTP server port. Defaults to 587 when omitted."
+        },
+        "username": {
+          "type": "string",
+          "description": "SMTP authentication username."
+        },
+        "password": {
+          "type": "string",
+          "description": "SMTP authentication password. Should always reference ${env:VAR}."
+        },
+        "from": {
+          "type": "string",
+          "description": "Sender address for outbound emails. Required for smtp provider."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,126 @@
+/* ─── Husky brand tokens ─────────────────────────────────────────────────── */
+:root {
+  --ifm-color-primary: #4f6ef7;
+  --ifm-color-primary-dark: #2f52f5;
+  --ifm-color-primary-darker: #1f44f4;
+  --ifm-color-primary-darkest: #0d31d8;
+  --ifm-color-primary-light: #6f8af9;
+  --ifm-color-primary-lighter: #8fa3fa;
+  --ifm-color-primary-lightest: #bfcbfc;
+
+  --husky-accent: #38bdf8;
+  --husky-accent-dim: rgba(56, 189, 248, 0.15);
+
+  --ifm-code-font-size: 93%;
+  --ifm-font-size-base: 16px;
+  --ifm-line-height-base: 1.7;
+  --ifm-navbar-height: 60px;
+  --ifm-global-radius: 0.5rem;
+
+  /* sidebar */
+  --ifm-sidebar-width: 280px;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #7c9df9;
+  --ifm-color-primary-dark: #5a80f7;
+  --ifm-color-primary-darker: #4f6ef7;
+  --ifm-color-primary-darkest: #2f52f5;
+  --ifm-color-primary-light: #9db5fb;
+  --ifm-color-primary-lighter: #becbfc;
+  --ifm-color-primary-lightest: #dce4fe;
+
+  --ifm-background-color: #0b1120;
+  --ifm-background-surface-color: #111827;
+  --ifm-navbar-background-color: rgba(11, 17, 32, 0.92);
+  --ifm-footer-background-color: #0b1120;
+  --ifm-toc-border-color: rgba(255, 255, 255, 0.07);
+  --ifm-hr-border-color: rgba(255, 255, 255, 0.07);
+}
+
+/* ─── Typography ─────────────────────────────────────────────────────────── */
+.markdown > h1:first-child {
+  --ifm-h1-font-size: 2.4rem;
+}
+
+.markdown h1, .markdown h2, .markdown h3 {
+  letter-spacing: -0.01em;
+}
+
+/* ─── Navbar ─────────────────────────────────────────────────────────────── */
+.navbar {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 1px 20px rgba(0, 0, 0, 0.2);
+}
+
+.navbar__logo img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+.navbar__title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+}
+
+/* GitHub icon in nav */
+.header-github-link::before {
+  content: '';
+  width: 24px;
+  height: 24px;
+  display: flex;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%23ffffff' d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E") no-repeat center;
+  background-size: 24px 24px;
+  opacity: 0.75;
+  transition: opacity 0.2s;
+}
+[data-theme='light'] .header-github-link::before {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%230f172a' d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E");
+}
+.header-github-link:hover::before { opacity: 1; }
+
+/* ─── Docs sidebar ────────────────────────────────────────────────────────── */
+.theme-doc-sidebar-menu .menu__link--active {
+  background: var(--husky-accent-dim);
+  border-left: 3px solid var(--husky-accent);
+  padding-left: calc(var(--ifm-menu-link-padding-horizontal) - 3px);
+}
+
+/* ─── Code blocks ─────────────────────────────────────────────────────────── */
+.prism-code {
+  border-radius: 0.5rem;
+  font-size: 0.87rem;
+}
+
+/* ─── Tables ──────────────────────────────────────────────────────────────── */
+table {
+  display: table;
+  width: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  font-size: 0.9rem;
+}
+
+th {
+  background: var(--ifm-color-emphasis-200);
+  font-weight: 600;
+}
+
+/* ─── Admonitions ─────────────────────────────────────────────────────────── */
+.admonition {
+  border-radius: 0.5rem;
+}
+
+/* ─── Footer ──────────────────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footer__logo {
+  margin-bottom: 0.5rem;
+  opacity: 0.85;
+}

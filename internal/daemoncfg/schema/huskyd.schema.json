@@ -1,0 +1,316 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/husky-scheduler/husky/schema/huskyd.schema.json",
+  "title": "huskyd.yaml",
+  "description": "Daemon runtime configuration for huskyd (the Husky scheduler daemon).",
+  "type": ["object", "null"],
+  "additionalProperties": false,
+  "properties": {
+    "api": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "addr": { "type": "string" },
+        "base_path": { "type": "string" },
+        "tls": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "cert": { "type": "string" },
+            "key": { "type": "string" },
+            "min_version": { "type": "string", "enum": ["1.2", "1.3"] },
+            "client_ca": { "type": "string" }
+          }
+        },
+        "cors": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "allowed_origins": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "allow_credentials": { "type": "boolean" }
+          }
+        },
+        "timeouts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "read_header": { "type": "string" },
+            "read": { "type": "string" },
+            "write": { "type": "string" },
+            "idle": { "type": "string" }
+          }
+        }
+      }
+    },
+    "auth": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["none", "bearer", "basic", "oidc"]
+        },
+        "bearer": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "token_file": { "type": "string" },
+            "token": { "type": "string" }
+          }
+        },
+        "basic": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "users": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["username", "password_hash"],
+                "properties": {
+                  "username": { "type": "string" },
+                  "password_hash": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "oidc": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "issuer": { "type": "string" },
+            "client_id": { "type": "string" },
+            "audience": { "type": "string" },
+            "jwks_uri": { "type": "string" },
+            "role_claim": { "type": "string" },
+            "default_role": { "type": "string" }
+          }
+        },
+        "rbac": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["role"],
+            "properties": {
+              "role": { "type": "string" },
+              "methods": { "type": "array", "items": { "type": "string" } },
+              "paths": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "log": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["debug", "info", "warn", "error"]
+        },
+        "format": { "type": "string", "enum": ["text", "json"] },
+        "output": { "type": "string", "enum": ["stdout", "stderr", "file"] },
+        "file": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "path": { "type": "string" },
+            "max_size_mb": { "type": "integer", "minimum": 0 },
+            "max_backups": { "type": "integer", "minimum": 0 },
+            "max_age_days": { "type": "integer", "minimum": 0 },
+            "compress": { "type": "boolean" }
+          }
+        },
+        "audit_log": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "path": { "type": "string" },
+            "max_size_mb": { "type": "integer", "minimum": 0 },
+            "max_backups": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "storage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "engine": { "type": "string" },
+        "sqlite": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "path": { "type": "string" },
+            "wal_autocheckpoint": { "type": "integer", "minimum": 0 },
+            "busy_timeout": { "type": "string" }
+          }
+        },
+        "retention": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_age": { "type": "string" },
+            "max_runs_per_job": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "scheduler": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_concurrent_jobs": { "type": "integer", "minimum": 1 },
+        "catchup_window": { "type": "string" },
+        "shutdown_timeout": { "type": "string" },
+        "schedule_jitter": { "type": "string" }
+      }
+    },
+    "executor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pool_size": { "type": "integer", "minimum": 1 },
+        "shell": { "type": "string" },
+        "working_dir": { "type": "string" },
+        "resource_limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_memory_mb": { "type": "integer", "minimum": 0 },
+            "max_open_files": { "type": "integer", "minimum": 0 },
+            "max_pids": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "global_env": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "addr": { "type": "string" },
+        "path": { "type": "string" },
+        "auth": { "type": "boolean" }
+      }
+    },
+    "tracing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "exporter": {
+          "type": "string",
+          "enum": ["otlp", "jaeger", "zipkin", "stdout"]
+        },
+        "endpoint": { "type": "string" },
+        "service_name": { "type": "string" },
+        "sample_rate": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "secrets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": [
+            "env",
+            "vault",
+            "aws_ssm",
+            "aws_secrets_manager",
+            "gcp_secret_manager"
+          ]
+        },
+        "vault": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "addr": { "type": "string" },
+            "token_file": { "type": "string" },
+            "mount": { "type": "string" },
+            "path_prefix": { "type": "string" }
+          }
+        },
+        "aws_ssm": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "region": { "type": "string" },
+            "path_prefix": { "type": "string" },
+            "access_key_id": { "type": "string" }
+          }
+        },
+        "aws_secrets_manager": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "region": { "type": "string" },
+            "access_key_id": { "type": "string" }
+          }
+        },
+        "gcp_secret_manager": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "project_id": { "type": "string" }
+          }
+        }
+      }
+    },
+    "alerts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "on_daemon_start": { "type": "array", "items": { "type": "string" } },
+        "on_sla_breach": { "type": "array", "items": { "type": "string" } },
+        "on_forced_kill": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "dashboard": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "title": { "type": "string" },
+        "accent_color": { "type": "string" },
+        "log_backfill_lines": { "type": "integer", "minimum": 0 },
+        "poll_interval": { "type": "string" }
+      }
+    },
+    "http_client": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "timeout": { "type": "string" },
+        "max_retries": { "type": "integer", "minimum": 0 },
+        "retry_backoff": { "type": "string" },
+        "proxy": { "type": "string" },
+        "ca_bundle": { "type": "string" }
+      }
+    },
+    "process": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "user": { "type": "string" },
+        "group": { "type": "string" },
+        "pid_file": { "type": "string" },
+        "ulimit_nofile": { "type": "integer", "minimum": 0 },
+        "watchdog_interval": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+api:
+  addr: 127.0.0.1:8420
+log:
+  level: info
+storage:
+  engine: sqlite
+  sqlite:
+    path: /var/lib/husky/husky.db

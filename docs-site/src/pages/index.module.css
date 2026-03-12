@@ -1,0 +1,596 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  padding: 6rem 2rem 5rem;
+  text-align: center;
+  overflow: hidden;
+  background: var(--ifm-background-color);
+}
+
+/* subtle multi-stop gradient orbs */
+.heroBg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% -10%, rgba(79, 110, 247, 0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 50% at 0% 80%, rgba(56, 189, 248, 0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 100% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.heroInner {
+  position: relative;
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heroLogo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 1.5rem;
+  border-radius: 50%;
+  background: rgba(79, 110, 247, 0.08);
+  border: 1px solid rgba(79, 110, 247, 0.2);
+  padding: 14px;
+}
+
+.eyebrow {
+  margin: 0 0 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ifm-color-primary-light);
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: clamp(2.4rem, 5.5vw, 4rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--ifm-heading-color);
+}
+
+.heroAccent {
+  background: linear-gradient(135deg, var(--ifm-color-primary) 0%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.heroSub {
+  margin: 1.5rem 0 0;
+  font-size: 1.15rem;
+  line-height: 1.75;
+  color: var(--ifm-color-emphasis-700);
+  max-width: 660px;
+}
+
+.heroCtas {
+  margin-top: 2.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.ctaPrimary {
+  box-shadow: 0 0 0 0 rgba(79, 110, 247, 0.4);
+  transition: box-shadow 0.25s;
+}
+.ctaPrimary:hover {
+  box-shadow: 0 0 0 6px rgba(79, 110, 247, 0.15);
+}
+
+.ctaGh {
+  border-color: var(--ifm-color-emphasis-300);
+  color: var(--ifm-color-emphasis-700) !important;
+}
+
+/* install snippet */
+.heroInstall {
+  margin-top: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #0d1117;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.6rem;
+  padding: 0.65rem 1.25rem;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.82rem;
+}
+
+[data-theme='light'] .heroInstall {
+  background: #1e293b;
+}
+
+.installPrompt {
+  color: #6ee7b7;
+  user-select: none;
+}
+
+.installCode {
+  color: #e2e8f0;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   PILLARS  (tight strip below hero)
+───────────────────────────────────────────────────────────────────────────── */
+.pillarsSection {
+  padding: 3.5rem 0;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.pillarsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0;
+}
+
+.pillarCard {
+  padding: 0 2rem;
+  text-align: center;
+  border-right: 1px solid var(--ifm-color-emphasis-200);
+}
+.pillarCard:last-child {
+  border-right: none;
+}
+
+.pillarTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: var(--ifm-heading-color);
+}
+
+.pillarDesc {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SHARED SECTION ATOMS
+───────────────────────────────────────────────────────────────────────────── */
+.section {
+  padding: 5.5rem 0;
+}
+
+.sectionDark {
+  padding: 5.5rem 0;
+  background: #0d1117;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+[data-theme='light'] .sectionDark {
+  background: #111827;
+}
+
+/* in sectionDark, text overrides */
+.sectionDark .sectionLabel {
+  color: rgba(99, 179, 237, 0.9);
+}
+.sectionDark .sectionTitle {
+  color: #f1f5f9;
+}
+.sectionDark .sectionSub {
+  color: #94a3b8;
+}
+
+.sectionLabel {
+  display: block;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ifm-color-primary-light);
+  margin-bottom: 0.75rem;
+}
+
+.sectionTitle {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-align: center;
+  margin: 0 0 0.75rem;
+}
+
+.sectionSub {
+  text-align: center;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin: 0 auto 3.5rem;
+  max-width: 620px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FEATURE GRID
+───────────────────────────────────────────────────────────────────────────── */
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.featureCard {
+  display: flex;
+  flex-direction: column;
+  padding: 1.75rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 1rem;
+  background: var(--ifm-background-surface-color);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.featureCard:hover {
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 8px 32px rgba(79, 110, 247, 0.14);
+  transform: translateY(-3px);
+}
+
+.featureTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.featureDesc {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--ifm-color-emphasis-700);
+  flex: 1;
+}
+
+.learnMore {
+  margin-top: 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+  letter-spacing: 0.01em;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   QUICKSTART  (interactive steps)
+───────────────────────────────────────────────────────────────────────────── */
+.stepsLayout {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 2rem;
+  align-items: start;
+  margin-top: 1rem;
+}
+
+.stepsTabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stepTab {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+  color: #94a3b8;
+  font-family: inherit;
+}
+
+.stepTab:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(79, 110, 247, 0.35);
+}
+
+.stepTabActive {
+  border-color: rgba(79, 110, 247, 0.6) !important;
+  background: rgba(79, 110, 247, 0.1) !important;
+  color: #e2e8f0 !important;
+}
+
+.stepNum {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: rgba(79, 110, 247, 0.2);
+  color: #93c5fd;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stepTabActive .stepNum {
+  background: rgba(79, 110, 247, 0.45);
+  color: #fff;
+}
+
+.stepMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.stepMeta strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+.stepMeta small {
+  font-size: 0.78rem;
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+.stepsCode {
+  border-radius: 0.85rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.codeHeader {
+  padding: 0.6rem 1.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.codeLang {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.codeBlock {
+  margin: 0;
+  padding: 1.5rem 1.5rem;
+  background: #0a0f1a;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: #cbd5e1;
+  overflow-x: auto;
+  border-radius: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DOC LINKS GRID
+───────────────────────────────────────────────────────────────────────────── */
+.docGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.docCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1.35rem 1.5rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 0.85rem;
+  background: var(--ifm-background-surface-color);
+  text-decoration: none !important;
+  color: inherit !important;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  position: relative;
+}
+
+.docCard:hover {
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 4px 20px rgba(79, 110, 247, 0.1);
+  transform: translateY(-2px);
+}
+
+.docCardTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ifm-heading-color);
+}
+
+.docCardDesc {
+  font-size: 0.82rem;
+  color: var(--ifm-color-emphasis-600);
+  line-height: 1.5;
+}
+
+.docCardArrow {
+  position: absolute;
+  top: 1.35rem;
+  right: 1.25rem;
+  font-size: 1rem;
+  color: var(--ifm-color-primary);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.docCard:hover .docCardArrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   COMMUNITY CTA
+───────────────────────────────────────────────────────────────────────────── */
+.communitySection {
+  padding: 6rem 0;
+  text-align: center;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(79, 110, 247, 0.12) 0%, transparent 70%),
+    var(--ifm-background-surface-color);
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.communityInner {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.communityTitle {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin: 0 0 1rem;
+}
+
+.communitySub {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0 0 2.5rem;
+}
+
+.communityActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 996px) {
+  .hero {
+    padding: 4rem 1.25rem 3.5rem;
+  }
+
+  .heroTitle {
+    font-size: clamp(2rem, 7vw, 3rem);
+  }
+
+  .heroSub {
+    font-size: 1rem;
+  }
+
+  .heroInstall {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .pillarsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+
+  .pillarCard {
+    border-right: none;
+  }
+
+  .featureGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stepsLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .stepsTabs {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 0.5rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .stepTab {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-width: 130px;
+    gap: 0.5rem;
+  }
+
+  .stepMeta small {
+    display: none;
+  }
+
+  .docGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 3rem 1rem 2.5rem;
+  }
+
+  .heroTitle {
+    font-size: clamp(1.8rem, 8vw, 2.6rem);
+  }
+
+  .heroCtas {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .heroCtas .button {
+    text-align: center;
+  }
+
+  .heroInstall {
+    font-size: 0.72rem;
+  }
+
+  .pillarsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .featureGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 3.5rem 0;
+  }
+
+  .sectionDark {
+    padding: 3.5rem 0;
+  }
+
+  .docGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .communitySection {
+    padding: 4rem 0;
+  }
+
+  .communityActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .communityActions .button {
+    text-align: center;
+  }
+}

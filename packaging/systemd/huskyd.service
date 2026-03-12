@@ -1,0 +1,17 @@
+[Unit]
+Description=Husky job scheduler daemon
+Documentation=https://github.com/husky-scheduler/husky
+After=network.target
+
+[Service]
+Type=simple
+User=husky
+Group=husky
+WorkingDirectory=/var/lib/husky
+ExecStart=/usr/bin/husky daemon run --config /etc/husky/husky.yaml --daemon-config /etc/husky/huskyd.yaml --data /var/lib/husky
+Restart=on-failure
+RestartSec=5
+Environment=HOME=/var/lib/husky
+
+[Install]
+WantedBy=multi-user.target

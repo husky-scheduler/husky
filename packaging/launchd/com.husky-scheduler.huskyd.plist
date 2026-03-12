@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.husky-scheduler.huskyd</string>
+
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/local/bin/husky</string>
+      <string>daemon</string>
+      <string>run</string>
+      <string>--config</string>
+      <string>/usr/local/etc/husky/husky.yaml</string>
+      <string>--daemon-config</string>
+      <string>/usr/local/etc/husky/huskyd.yaml</string>
+      <string>--data</string>
+      <string>/usr/local/var/husky</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/usr/local/var/husky</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/usr/local/var/log/huskyd.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/usr/local/var/log/huskyd.log</string>
+  </dict>
+</plist>

@@ -1,0 +1,74 @@
+# husky.yaml
+# Pipeline: ingest raw data → transform → generate report → notify team
+# This is the full example from §2.3 of the Technical Design Document.
+
+version: "1"
+
+defaults:
+  timeout: "30m"
+  retries: 3
+  retry_delay: exponential
+  notify_on_failure: false
+
+jobs:
+  # ── Step 1: Pull raw data from upstream API ──────────────────
+  ingest_raw_data:
+    description: "Download last 24h of events from the events API"
+    frequency: daily
+    time: "0200"
+    command: "./scripts/ingest.sh"
+    timeout: "1h"
+    retries: 5
+    retry_delay: exponential
+    on_failure: alert
+    env:
+      API_KEY: "${env:EVENTS_API_KEY}"
+      OUTPUT_DIR: "/data/raw"
+    notify:
+      on_failure: pagerduty:p1
+
+  # ── Step 2: Transform raw → normalised (runs after ingest) ───
+  transform_data:
+    description: "Normalise, deduplicate, and validate ingested events"
+    frequency: after:ingest_raw_data
+    command: "python pipeline/transform.py"
+    working_dir: "./pipeline"
+    timeout: "45m"
+    retries: 2
+    retry_delay: exponential
+    on_failure: stop
+    env:
+      INPUT_DIR: "/data/raw"
+      OUTPUT_DIR: "/data/clean"
+
+  # ── Step 3: Generate daily report ────────────────────────────
+  generate_report:
+    description: "Build PDF summary report from cleaned data"
+    frequency: after:transform_data
+    command: "node scripts/report.js"
+    timeout: "20m"
+    retries: 1
+    retry_delay: exponential
+    on_failure: alert
+    notify:
+      on_success: slack:#data-reports
+      on_failure: slack:#data-alerts
+
+  # ── Step 4: Sync report to S3 (independent daily job) ────────
+  sync_to_s3:
+    description: "Upload reports directory to S3 backup bucket"
+    frequency: daily
+    time: "0600"
+    command: "aws s3 sync ./reports s3://my-bucket/reports"
+    retries: 3
+    on_failure: alert
+
+  # ── Maintenance: weekly cleanup ───────────────────────────────
+  cleanup_old_files:
+    description: "Delete raw files older than 30 days"
+    frequency: weekly
+    time: "0300"
+    command: "./scripts/cleanup.sh --older-than 30d"
+    timeout: "15m"
+    concurrency: forbid
+    on_failure: ignore

@@ -1,0 +1,60 @@
+# Binaries
+/husky
+bin/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built by 'go test -c'
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.html
+
+# Dependency vendor directory
+vendor/
+
+# Node dependencies
+node_modules/
+docs-site/build/
+docs-site/.docusaurus/
+docs-site/.cache-loader/
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor directories
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Archived planning docs
+dev-docs/
+
+# Daemon runtime files
+.husky/
+daemon.pid
+husky.db
+husky.db-wal
+husky.db-shm
+
+# Test fixtures output
+tests/testdata/output/
+testproject/

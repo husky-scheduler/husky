@@ -1,0 +1,92 @@
+project_name: husky
+
+before:
+  hooks:
+    - make web
+
+builds:
+  - id: husky
+    binary: husky
+    main: ./cmd/husky
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - >-
+        -s -w
+        -X github.com/husky-scheduler/husky/internal/version.Version={{ .Version }}
+        -X github.com/husky-scheduler/husky/internal/version.Commit={{ .Commit }}
+        -X github.com/husky-scheduler/husky/internal/version.BuildDate={{ .Date }}
+
+archives:
+  - id: bundles
+    ids:
+      - husky
+    formats:
+      - tar.gz
+    name_template: >-
+      {{ .ProjectName }}_{{ .Os }}_{{ .Arch }}
+    files:
+      - src: install.sh
+        dst: install.sh
+      - src: packaging/systemd/huskyd.service
+        dst: packaging/systemd/huskyd.service
+      - src: packaging/launchd/com.husky-scheduler.huskyd.plist
+        dst: packaging/launchd/com.husky-scheduler.huskyd.plist
+
+checksum:
+  name_template: checksums.txt
+
+signs:
+  - artifacts: checksum
+    cmd: cosign
+    args:
+      - sign-blob
+      - --key=env://COSIGN_PRIVATE_KEY
+      - --output-signature
+      - ${signature}
+      - ${artifact}
+    signature: ${artifact}.sig
+
+nfpms:
+  - id: linux-packages
+    package_name: husky
+    ids:
+      - husky
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/bin
+    homepage: https://github.com/husky-scheduler/husky
+    maintainer: Husky Scheduler Maintainers <maintainers@husky-scheduler.dev>
+    description: Local-first job scheduler with dependency graphs.
+    section: utils
+    priority: optional
+    contents:
+      - src: packaging/systemd/huskyd.service
+        dst: /lib/systemd/system/huskyd.service
+      - src: packaging/examples/husky.yaml
+        dst: /usr/share/doc/husky/examples/husky.yaml
+        type: config|noreplace
+      - src: packaging/examples/huskyd.yaml
+        dst: /usr/share/doc/husky/examples/huskyd.yaml
+        type: config|noreplace
+    scripts:
+      postinstall: packaging/nfpm/postinstall.sh
+      postremove: packaging/nfpm/postremove.sh
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+release:
+  draft: false
+  prerelease: auto

@@ -1,0 +1,10 @@
+version: "1"
+defaults:
+  timeout: "30m"
+  retries: 2
+  retry_delay: exponential
+jobs:
+  hello_world:
+    description: "Example job shipped with Husky packages"
+    frequency: manual
+    command: "echo hello from husky"

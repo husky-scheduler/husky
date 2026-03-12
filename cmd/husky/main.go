@@ -1136,20 +1136,20 @@ machine-readable JSON array suitable for piping to jq or other tools.`,
 			if asJSON {
 				// Pretty-print the JSON.
 				var v interface{}
-				if unmarshalErr := json.Unmarshal(resp.Data, &v); unmarshalErr != nil {
-					fmt.Printf("%s\n", resp.Data)
+				if json.Unmarshal(resp.Data, &v) == nil {
+					out, _ := json.MarshalIndent(v, "", "  ")
+					fmt.Println(string(out))
 					return nil
 				}
-				out, _ := json.MarshalIndent(v, "", "  ")
-				fmt.Println(string(out))
+				fmt.Printf("%s\n", resp.Data)
 			} else {
 				// Data is a JSON-encoded string; decode it back to plain text.
 				var text string
-				if unmarshalErr := json.Unmarshal(resp.Data, &text); unmarshalErr != nil {
-					fmt.Print(string(resp.Data))
+				if json.Unmarshal(resp.Data, &text) == nil {
+					fmt.Print(text)
 					return nil
 				}
-				fmt.Print(text)
+				fmt.Print(string(resp.Data))
 			}
 			return nil
 		},

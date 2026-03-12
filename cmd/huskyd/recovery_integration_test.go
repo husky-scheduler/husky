@@ -5,10 +5,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/husky-scheduler/husky/internal/config"
-	"github.com/husky-scheduler/husky/internal/store"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/husky-scheduler/husky/internal/config"
+	"github.com/husky-scheduler/husky/internal/store"
 )
 
 func openDaemonTestStore(t *testing.T) *store.Store {

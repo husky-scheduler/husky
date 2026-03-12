@@ -227,6 +227,3 @@ func (s *Server) handleConn(conn net.Conn) {
 		reply(false, fmt.Sprintf("unknown request type: %q", req.Type), nil)
 	}
 }
-
-
-

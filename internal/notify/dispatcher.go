@@ -331,9 +331,9 @@ func (d *Dispatcher) sendOnce(
 			dedup = fmt.Sprintf("husky-%s-%d", run.JobName, run.ID)
 		}
 		payload := map[string]any{
-			"routing_key": intg.RoutingKey,
+			"routing_key":  intg.RoutingKey,
 			"event_action": "trigger",
-			"dedup_key": dedup,
+			"dedup_key":    dedup,
 			"payload": map[string]any{
 				"summary":  message,
 				"source":   "husky",

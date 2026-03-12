@@ -5,11 +5,12 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/husky-scheduler/husky/internal/config"
 	"github.com/husky-scheduler/husky/internal/outputs"
 	"github.com/husky-scheduler/husky/internal/store"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func openTestStore(t *testing.T) *store.Store {

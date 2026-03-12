@@ -125,9 +125,9 @@ var outputCaptureModes = map[string]bool{
 	"exit_code":  true,
 }
 
-// validateOutputCaptureMode returns an error message if mode is not a recognised
-// output capture mode, or "" if valid.
-// Valid forms: last_line | first_line | exit_code | json_field:<key> | regex:<pattern>
+// validateOutputCaptureMode validates one output capture mode.
+// It returns an error message when the mode is invalid, or "" if valid.
+// Valid forms: last_line | first_line | exit_code | json_field:<key> | regex:<pattern>.
 func validateOutputCaptureMode(mode string) string {
 	if outputCaptureModes[mode] {
 		return ""

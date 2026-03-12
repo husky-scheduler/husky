@@ -6,9 +6,10 @@ import (
 	"log/slog"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/husky-scheduler/husky/internal/config"
 	"github.com/husky-scheduler/husky/internal/store"
-	"github.com/stretchr/testify/assert"
 )
 
 func testLogger() *slog.Logger {
